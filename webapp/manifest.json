@@ -1,0 +1,130 @@
+{
+  "_version": "1.84.0",
+  "sap.app": {
+    "id": "bacodex",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZINVOICE_MANAGEMENT_SRV/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0",
+          "localUri": "localService/metadata.xml"
+        }
+      }
+    },
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.23.0",
+      "toolsId": "8c9e8e88-f99a-4f75-ae3e-edc1db6637e9"
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.147.2",
+      "libs": {
+        "sap.m": {},
+        "sap.f": {},
+        "sap.uxap": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "": {
+        "dataSource": "mainService",
+        "settings": {
+          "defaultBindingMode": "TwoWay",
+          "defaultCountMode": "Inline",
+          "useBatch": false
+        },
+        "type": "sap.ui.model.odata.v2.ODataModel"
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "bacodex.i18n.i18n"
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "bacodex.view",
+        "async": true,
+        "viewPath": "bacodex.view"
+      },
+      "routes": [
+        {
+          "name": "RouteInvoiceList",
+          "pattern": ":?query:",
+          "target": [
+            "TargetInvoiceList"
+          ]
+        },
+        {
+          "name": "RouteInvoiceObject",
+          "pattern": "Invoices/{invoiceId}",
+          "target": [
+            "TargetInvoiceObject"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetInvoiceList": {
+          "id": "InvoiceList",
+          "name": "InvoiceList"
+        },
+        "TargetInvoiceObject": {
+          "id": "InvoiceObject",
+          "name": "InvoiceObject"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "bacodex.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}

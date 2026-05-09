@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0"
+    xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"
+    xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+    xmlns:sap="http://www.sap.com/Protocols/SAPData">
+    <edmx:DataServices m:DataServiceVersion="2.0">
+        <Schema Namespace="ZINVOICE_MANAGEMENT_SRV" xml:lang="de"
+            xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+            <EntityType Name="Invoice" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="InvoiceId"/>
+                </Key>
+                <Property Name="InvoiceId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Rechnungs-ID"/>
+                <Property Name="InvoiceNumber" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Rechnungsnummer"/>
+                <Property Name="VendorName" Type="Edm.String" Nullable="false" MaxLength="120" sap:label="Lieferant"/>
+                <Property Name="VendorId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Lieferanten-ID"/>
+                <Property Name="InvoiceDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:display-format="Date" sap:label="Rechnungsdatum"/>
+                <Property Name="DueDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:display-format="Date" sap:label="Faelligkeitsdatum"/>
+                <Property Name="PostingDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label="Buchungsdatum"/>
+                <Property Name="NetAmount" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:unit="Currency" sap:label="Nettobetrag"/>
+                <Property Name="TaxAmount" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:unit="Currency" sap:label="Steuerbetrag"/>
+                <Property Name="GrossAmount" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:unit="Currency" sap:label="Bruttobetrag"/>
+                <Property Name="Currency" Type="Edm.String" Nullable="false" MaxLength="3" sap:semantics="currency-code" sap:label="Waehrung"/>
+                <Property Name="Status" Type="Edm.String" Nullable="false" MaxLength="10" sap:label="Status"/>
+                <Property Name="PaymentTerms" Type="Edm.String" MaxLength="40" sap:label="Zahlungsbedingungen"/>
+                <Property Name="CompanyCode" Type="Edm.String" MaxLength="4" sap:label="Buchungskreis"/>
+                <NavigationProperty Name="ToItems" Relationship="ZINVOICE_MANAGEMENT_SRV.Invoice_InvoiceItems" FromRole="FromRole_Invoice" ToRole="ToRole_InvoiceItem"/>
+                <NavigationProperty Name="ToTaxItems" Relationship="ZINVOICE_MANAGEMENT_SRV.Invoice_TaxItems" FromRole="FromRole_Invoice" ToRole="ToRole_TaxItem"/>
+                <NavigationProperty Name="ToNotes" Relationship="ZINVOICE_MANAGEMENT_SRV.Invoice_Notes" FromRole="FromRole_Invoice" ToRole="ToRole_Note"/>
+                <NavigationProperty Name="ToAttachments" Relationship="ZINVOICE_MANAGEMENT_SRV.Invoice_Attachments" FromRole="FromRole_Invoice" ToRole="ToRole_Attachment"/>
+            </EntityType>
+
+            <EntityType Name="InvoiceItem" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="InvoiceId"/>
+                    <PropertyRef Name="ItemId"/>
+                </Key>
+                <Property Name="ItemId" Type="Edm.String" Nullable="false" MaxLength="10" sap:label="Position"/>
+                <Property Name="InvoiceId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Rechnungs-ID"/>
+                <Property Name="Description" Type="Edm.String" Nullable="false" MaxLength="120" sap:label="Beschreibung"/>
+                <Property Name="Quantity" Type="Edm.Decimal" Nullable="false" Precision="13" Scale="3" sap:label="Menge"/>
+                <Property Name="UnitPrice" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:label="Einzelpreis"/>
+                <Property Name="TaxRate" Type="Edm.Decimal" Nullable="false" Precision="5" Scale="2" sap:label="Steuersatz"/>
+                <Property Name="TaxCode" Type="Edm.String" Nullable="false" MaxLength="5" sap:label="Steuerkennzeichen"/>
+                <Property Name="NetAmount" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:label="Nettobetrag"/>
+                <Property Name="TaxAmount" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:label="Steuerbetrag"/>
+                <Property Name="GrossAmount" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:label="Bruttobetrag"/>
+            </EntityType>
+
+            <EntityType Name="TaxItem" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="TaxItemId"/>
+                </Key>
+                <Property Name="TaxItemId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Steuerposition"/>
+                <Property Name="InvoiceId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Rechnungs-ID"/>
+                <Property Name="TaxRate" Type="Edm.Decimal" Nullable="false" Precision="5" Scale="2" sap:label="Steuersatz"/>
+                <Property Name="TaxBase" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:label="Steuerbasis"/>
+                <Property Name="TaxAmount" Type="Edm.Decimal" Nullable="false" Precision="15" Scale="2" sap:label="Steuerbetrag"/>
+            </EntityType>
+
+            <EntityType Name="Note" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="InvoiceId"/>
+                </Key>
+                <Property Name="InvoiceId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Rechnungs-ID"/>
+                <Property Name="NoteText" Type="Edm.String" Nullable="false" MaxLength="500" sap:label="Notiz"/>
+                <Property Name="CreatedBy" Type="Edm.String" MaxLength="40" sap:label="Erstellt von"/>
+            </EntityType>
+
+            <EntityType Name="Attachment" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="AttachmentId"/>
+                </Key>
+                <Property Name="AttachmentId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Anlage"/>
+                <Property Name="InvoiceId" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Rechnungs-ID"/>
+                <Property Name="FileName" Type="Edm.String" Nullable="false" MaxLength="120" sap:label="Dateiname"/>
+                <Property Name="FileType" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Dateityp"/>
+                <Property Name="FileSize" Type="Edm.Int32" Nullable="false" sap:label="Dateigroesse"/>
+                <Property Name="MimeType" Type="Edm.String" Nullable="false" MaxLength="80" sap:label="MIME-Typ"/>
+            </EntityType>
+
+            <Association Name="Invoice_InvoiceItems">
+                <End Type="ZINVOICE_MANAGEMENT_SRV.Invoice" Multiplicity="1" Role="FromRole_Invoice"/>
+                <End Type="ZINVOICE_MANAGEMENT_SRV.InvoiceItem" Multiplicity="*" Role="ToRole_InvoiceItem"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_Invoice">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Principal>
+                    <Dependent Role="ToRole_InvoiceItem">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="Invoice_TaxItems">
+                <End Type="ZINVOICE_MANAGEMENT_SRV.Invoice" Multiplicity="1" Role="FromRole_Invoice"/>
+                <End Type="ZINVOICE_MANAGEMENT_SRV.TaxItem" Multiplicity="*" Role="ToRole_TaxItem"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_Invoice">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Principal>
+                    <Dependent Role="ToRole_TaxItem">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="Invoice_Notes">
+                <End Type="ZINVOICE_MANAGEMENT_SRV.Invoice" Multiplicity="1" Role="FromRole_Invoice"/>
+                <End Type="ZINVOICE_MANAGEMENT_SRV.Note" Multiplicity="0..1" Role="ToRole_Note"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_Invoice">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Principal>
+                    <Dependent Role="ToRole_Note">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="Invoice_Attachments">
+                <End Type="ZINVOICE_MANAGEMENT_SRV.Invoice" Multiplicity="1" Role="FromRole_Invoice"/>
+                <End Type="ZINVOICE_MANAGEMENT_SRV.Attachment" Multiplicity="*" Role="ToRole_Attachment"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_Invoice">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Principal>
+                    <Dependent Role="ToRole_Attachment">
+                        <PropertyRef Name="InvoiceId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+
+            <EntityContainer Name="ZINVOICE_MANAGEMENT_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+                <EntitySet Name="Invoices" EntityType="ZINVOICE_MANAGEMENT_SRV.Invoice" sap:content-version="1"/>
+                <EntitySet Name="InvoiceItems" EntityType="ZINVOICE_MANAGEMENT_SRV.InvoiceItem" sap:content-version="1"/>
+                <EntitySet Name="TaxItems" EntityType="ZINVOICE_MANAGEMENT_SRV.TaxItem" sap:content-version="1"/>
+                <EntitySet Name="Notes" EntityType="ZINVOICE_MANAGEMENT_SRV.Note" sap:content-version="1"/>
+                <EntitySet Name="Attachments" EntityType="ZINVOICE_MANAGEMENT_SRV.Attachment" sap:content-version="1"/>
+                <AssociationSet Name="Invoice_InvoiceItems_AssocSet" Association="ZINVOICE_MANAGEMENT_SRV.Invoice_InvoiceItems">
+                    <End EntitySet="Invoices" Role="FromRole_Invoice"/>
+                    <End EntitySet="InvoiceItems" Role="ToRole_InvoiceItem"/>
+                </AssociationSet>
+                <AssociationSet Name="Invoice_TaxItems_AssocSet" Association="ZINVOICE_MANAGEMENT_SRV.Invoice_TaxItems">
+                    <End EntitySet="Invoices" Role="FromRole_Invoice"/>
+                    <End EntitySet="TaxItems" Role="ToRole_TaxItem"/>
+                </AssociationSet>
+                <AssociationSet Name="Invoice_Notes_AssocSet" Association="ZINVOICE_MANAGEMENT_SRV.Invoice_Notes">
+                    <End EntitySet="Invoices" Role="FromRole_Invoice"/>
+                    <End EntitySet="Notes" Role="ToRole_Note"/>
+                </AssociationSet>
+                <AssociationSet Name="Invoice_Attachments_AssocSet" Association="ZINVOICE_MANAGEMENT_SRV.Invoice_Attachments">
+                    <End EntitySet="Invoices" Role="FromRole_Invoice"/>
+                    <End EntitySet="Attachments" Role="ToRole_Attachment"/>
+                </AssociationSet>
+            </EntityContainer>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

@@ -1,0 +1,6 @@
+[
+  {"InvoiceId":"INV-002","NoteText":"Pruefung der Leistungsnachweise vor Buchung erforderlich.","CreatedBy":"AP_CLERK"},
+  {"InvoiceId":"INV-004","NoteText":"Kostenstelle Consulting noch bestaetigen.","CreatedBy":"AP_CLERK"},
+  {"InvoiceId":"INV-006","NoteText":"Liefermenge mit Einkauf abgleichen.","CreatedBy":"AP_CLERK"},
+  {"InvoiceId":"INV-009","NoteText":"Vertragsnummer im Buchungstext ergaenzen.","CreatedBy":"AP_CLERK"}
+]

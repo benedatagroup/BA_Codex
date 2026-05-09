@@ -1,0 +1,21 @@
+[
+  {"InvoiceId":"INV-001","ItemId":"10","Description":"Ergonomische Buerostuehle","Quantity":"4.000","UnitPrice":"180.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"720.00","TaxAmount":"136.80","GrossAmount":"856.80"},
+  {"InvoiceId":"INV-001","ItemId":"20","Description":"Schreibtischzubehoer","Quantity":"1.000","UnitPrice":"120.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"120.00","TaxAmount":"22.80","GrossAmount":"142.80"},
+  {"InvoiceId":"INV-002","ItemId":"10","Description":"Wartung ERP-Schnittstelle","Quantity":"1.000","UnitPrice":"1650.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"1650.00","TaxAmount":"313.50","GrossAmount":"1963.50"},
+  {"InvoiceId":"INV-002","ItemId":"20","Description":"Remote Support Kontingent","Quantity":"10.000","UnitPrice":"80.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"800.00","TaxAmount":"152.00","GrossAmount":"952.00"},
+  {"InvoiceId":"INV-003","ItemId":"10","Description":"Transport Inland","Quantity":"1.000","UnitPrice":"950.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"950.00","TaxAmount":"180.50","GrossAmount":"1130.50"},
+  {"InvoiceId":"INV-003","ItemId":"20","Description":"Lagerumschlag","Quantity":"3.000","UnitPrice":"110.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"330.00","TaxAmount":"62.70","GrossAmount":"392.70"},
+  {"InvoiceId":"INV-004","ItemId":"10","Description":"Prozessberatung Kreditoren","Quantity":"4.000","UnitPrice":"750.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"3000.00","TaxAmount":"570.00","GrossAmount":"3570.00"},
+  {"InvoiceId":"INV-004","ItemId":"20","Description":"Workshop Dokumentation","Quantity":"1.000","UnitPrice":"600.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"600.00","TaxAmount":"114.00","GrossAmount":"714.00"},
+  {"InvoiceId":"INV-005","ItemId":"10","Description":"Ersatzteile Fertigungslinie","Quantity":"5.000","UnitPrice":"95.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"475.00","TaxAmount":"90.25","GrossAmount":"565.25"},
+  {"InvoiceId":"INV-005","ItemId":"20","Description":"Expresszuschlag","Quantity":"1.000","UnitPrice":"100.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"100.00","TaxAmount":"19.00","GrossAmount":"119.00"},
+  {"InvoiceId":"INV-006","ItemId":"10","Description":"Produktbroschueren Druck","Quantity":"2000.000","UnitPrice":"0.42","TaxRate":"19.00","TaxCode":"V1","NetAmount":"840.00","TaxAmount":"159.60","GrossAmount":"999.60"},
+  {"InvoiceId":"INV-006","ItemId":"20","Description":"Verpackungsmaterial","Quantity":"20.000","UnitPrice":"17.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"340.00","TaxAmount":"64.60","GrossAmount":"404.60"},
+  {"InvoiceId":"INV-007","ItemId":"10","Description":"Gebaeudereinigung Januar","Quantity":"1.000","UnitPrice":"925.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"925.00","TaxAmount":"175.75","GrossAmount":"1100.75"},
+  {"InvoiceId":"INV-008","ItemId":"10","Description":"Kampagnenkonzept","Quantity":"1.000","UnitPrice":"1200.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"1200.00","TaxAmount":"228.00","GrossAmount":"1428.00"},
+  {"InvoiceId":"INV-008","ItemId":"20","Description":"Anzeigenschaltung Fachportal","Quantity":"2.000","UnitPrice":"455.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"910.00","TaxAmount":"172.90","GrossAmount":"1082.90"},
+  {"InvoiceId":"INV-009","ItemId":"10","Description":"Cloud Storage Monatsgebuehr","Quantity":"1.000","UnitPrice":"450.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"450.00","TaxAmount":"85.50","GrossAmount":"535.50"},
+  {"InvoiceId":"INV-009","ItemId":"20","Description":"Backup Monitoring","Quantity":"1.000","UnitPrice":"300.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"300.00","TaxAmount":"57.00","GrossAmount":"357.00"},
+  {"InvoiceId":"INV-010","ItemId":"10","Description":"Stromlieferung Standort Hamburg","Quantity":"1.000","UnitPrice":"1450.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"1450.00","TaxAmount":"275.50","GrossAmount":"1725.50"},
+  {"InvoiceId":"INV-010","ItemId":"20","Description":"Messstellenbetrieb","Quantity":"1.000","UnitPrice":"225.00","TaxRate":"19.00","TaxCode":"V1","NetAmount":"225.00","TaxAmount":"42.75","GrossAmount":"267.75"}
+]

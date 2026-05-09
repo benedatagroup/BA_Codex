@@ -1,0 +1,12 @@
+[
+  {"TaxItemId":"TAX-001","InvoiceId":"INV-001","TaxRate":"19.00","TaxBase":"840.00","TaxAmount":"159.60"},
+  {"TaxItemId":"TAX-002","InvoiceId":"INV-002","TaxRate":"19.00","TaxBase":"2450.00","TaxAmount":"465.50"},
+  {"TaxItemId":"TAX-003","InvoiceId":"INV-003","TaxRate":"19.00","TaxBase":"1280.00","TaxAmount":"243.20"},
+  {"TaxItemId":"TAX-004","InvoiceId":"INV-004","TaxRate":"19.00","TaxBase":"3600.00","TaxAmount":"684.00"},
+  {"TaxItemId":"TAX-005","InvoiceId":"INV-005","TaxRate":"19.00","TaxBase":"575.00","TaxAmount":"109.25"},
+  {"TaxItemId":"TAX-006","InvoiceId":"INV-006","TaxRate":"19.00","TaxBase":"1180.00","TaxAmount":"224.20"},
+  {"TaxItemId":"TAX-007","InvoiceId":"INV-007","TaxRate":"19.00","TaxBase":"925.00","TaxAmount":"175.75"},
+  {"TaxItemId":"TAX-008","InvoiceId":"INV-008","TaxRate":"19.00","TaxBase":"2110.00","TaxAmount":"400.90"},
+  {"TaxItemId":"TAX-009","InvoiceId":"INV-009","TaxRate":"19.00","TaxBase":"750.00","TaxAmount":"142.50"},
+  {"TaxItemId":"TAX-010","InvoiceId":"INV-010","TaxRate":"19.00","TaxBase":"1675.00","TaxAmount":"318.25"}
+]

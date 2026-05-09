@@ -1,0 +1,26 @@
+<mvc:View
+    controllerName="bacodex.controller.InvoiceObject"
+    displayBlock="true"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:uxap="sap.uxap">
+    <uxap:ObjectPageLayout id="invoiceObjectPage" showFooter="false">
+        <uxap:headerTitle>
+            <uxap:ObjectPageDynamicHeaderTitle>
+                <uxap:expandedHeading>
+                    <Title text="{InvoiceNumber}" level="H1"/>
+                </uxap:expandedHeading>
+                <uxap:snappedHeading>
+                    <Title text="{InvoiceNumber}" level="H1"/>
+                </uxap:snappedHeading>
+                <uxap:actions>
+                    <Button
+                        icon="sap-icon://nav-back"
+                        text="{i18n>back}"
+                        type="Transparent"
+                        press=".onNavBack"/>
+                </uxap:actions>
+            </uxap:ObjectPageDynamicHeaderTitle>
+        </uxap:headerTitle>
+    </uxap:ObjectPageLayout>
+</mvc:View>
