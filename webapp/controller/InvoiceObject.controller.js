@@ -1,9 +1,12 @@
 sap.ui.define([
-    "sap/ui/core/mvc/Controller"
-], function (Controller) {
+    "sap/ui/core/mvc/Controller",
+    "bacodex/model/formatter"
+], function (Controller, formatter) {
     "use strict";
 
     return Controller.extend("bacodex.controller.InvoiceObject", {
+        formatter: formatter,
+
         onInit: function () {
             this.getOwnerComponent().getRouter()
                 .getRoute("RouteInvoiceObject")
@@ -21,7 +24,25 @@ sap.ui.define([
                 });
 
             this.getView().bindElement({
-                path: sPath
+                path: sPath,
+                parameters: {
+                    select: [
+                        "InvoiceId",
+                        "InvoiceNumber",
+                        "VendorName",
+                        "VendorId",
+                        "InvoiceDate",
+                        "DueDate",
+                        "PostingDate",
+                        "NetAmount",
+                        "TaxAmount",
+                        "GrossAmount",
+                        "Currency",
+                        "Status",
+                        "PaymentTerms",
+                        "CompanyCode"
+                    ].join(",")
+                }
             });
         }
     });

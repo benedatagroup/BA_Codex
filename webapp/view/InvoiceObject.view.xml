@@ -2,16 +2,27 @@
     controllerName="bacodex.controller.InvoiceObject"
     displayBlock="true"
     xmlns="sap.m"
+    xmlns:form="sap.ui.layout.form"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:uxap="sap.uxap">
-    <uxap:ObjectPageLayout id="invoiceObjectPage" showFooter="false">
+    <uxap:ObjectPageLayout
+        id="invoiceObjectPage"
+        showFooter="false"
+        showTitleInHeaderContent="true"
+        useIconTabBar="false">
         <uxap:headerTitle>
             <uxap:ObjectPageDynamicHeaderTitle>
                 <uxap:expandedHeading>
-                    <Title text="{InvoiceNumber}" level="H1"/>
+                    <VBox>
+                        <Title text="{InvoiceNumber}" level="H1"/>
+                        <Text text="{VendorName}"/>
+                    </VBox>
                 </uxap:expandedHeading>
                 <uxap:snappedHeading>
-                    <Title text="{InvoiceNumber}" level="H1"/>
+                    <VBox>
+                        <Title text="{InvoiceNumber}" level="H1"/>
+                        <Text text="{VendorName}"/>
+                    </VBox>
                 </uxap:snappedHeading>
                 <uxap:actions>
                     <Button
@@ -22,5 +33,164 @@
                 </uxap:actions>
             </uxap:ObjectPageDynamicHeaderTitle>
         </uxap:headerTitle>
+        <uxap:headerContent>
+            <FlexBox
+                wrap="Wrap"
+                alignItems="Start"
+                class="sapUiSmallMarginTopBottom">
+                <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom">
+                    <Label text="{i18n>status}"/>
+                    <ObjectStatus
+                        text="{Status}"
+                        state="{path: 'Status', formatter: '.formatter.statusState'}"/>
+                </VBox>
+                <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom">
+                    <Label text="{i18n>netAmount}"/>
+                    <ObjectNumber
+                        number="{path: 'NetAmount', formatter: '.formatter.amount'}"
+                        unit="{Currency}"/>
+                </VBox>
+                <VBox class="sapUiLargeMarginEnd sapUiSmallMarginBottom">
+                    <Label text="{i18n>grossAmount}"/>
+                    <ObjectNumber
+                        number="{path: 'GrossAmount', formatter: '.formatter.amount'}"
+                        unit="{Currency}"
+                        emphasized="true"/>
+                </VBox>
+            </FlexBox>
+        </uxap:headerContent>
+        <uxap:sections>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionGeneral}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <form:SimpleForm
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="4"
+                                labelSpanL="4"
+                                labelSpanM="4"
+                                labelSpanS="12"
+                                columnsXL="2"
+                                columnsL="2"
+                                columnsM="1">
+                                <Label text="{i18n>invoiceId}"/>
+                                <Text text="{InvoiceId}"/>
+                                <Label text="{i18n>invoiceNumber}"/>
+                                <Text text="{InvoiceNumber}"/>
+                                <Label text="{i18n>status}"/>
+                                <ObjectStatus
+                                    text="{Status}"
+                                    state="{path: 'Status', formatter: '.formatter.statusState'}"/>
+                                <Label text="{i18n>companyCode}"/>
+                                <Text text="{CompanyCode}"/>
+                            </form:SimpleForm>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionDates}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <form:SimpleForm
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="4"
+                                labelSpanL="4"
+                                labelSpanM="4"
+                                labelSpanS="12"
+                                columnsXL="2"
+                                columnsL="2"
+                                columnsM="1">
+                                <Label text="{i18n>invoiceDate}"/>
+                                <Text text="{
+                                    path: 'InvoiceDate',
+                                    type: 'sap.ui.model.type.Date',
+                                    formatOptions: {
+                                        style: 'medium'
+                                    }
+                                }"/>
+                                <Label text="{i18n>dueDate}"/>
+                                <Text text="{
+                                    path: 'DueDate',
+                                    type: 'sap.ui.model.type.Date',
+                                    formatOptions: {
+                                        style: 'medium'
+                                    }
+                                }"/>
+                                <Label text="{i18n>postingDate}"/>
+                                <Text text="{
+                                    path: 'PostingDate',
+                                    type: 'sap.ui.model.type.Date',
+                                    formatOptions: {
+                                        style: 'medium'
+                                    }
+                                }"/>
+                            </form:SimpleForm>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionAmounts}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <form:SimpleForm
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="4"
+                                labelSpanL="4"
+                                labelSpanM="4"
+                                labelSpanS="12"
+                                columnsXL="2"
+                                columnsL="2"
+                                columnsM="1">
+                                <Label text="{i18n>netAmount}"/>
+                                <ObjectNumber
+                                    number="{path: 'NetAmount', formatter: '.formatter.amount'}"
+                                    unit="{Currency}"/>
+                                <Label text="{i18n>taxAmount}"/>
+                                <ObjectNumber
+                                    number="{path: 'TaxAmount', formatter: '.formatter.amount'}"
+                                    unit="{Currency}"/>
+                                <Label text="{i18n>grossAmount}"/>
+                                <ObjectNumber
+                                    number="{path: 'GrossAmount', formatter: '.formatter.amount'}"
+                                    unit="{Currency}"
+                                    emphasized="true"/>
+                                <Label text="{i18n>currency}"/>
+                                <Text text="{Currency}"/>
+                            </form:SimpleForm>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionBusinessPartner}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <form:SimpleForm
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="4"
+                                labelSpanL="4"
+                                labelSpanM="4"
+                                labelSpanS="12"
+                                columnsXL="2"
+                                columnsL="2"
+                                columnsM="1">
+                                <Label text="{i18n>vendorName}"/>
+                                <Text text="{VendorName}"/>
+                                <Label text="{i18n>vendorId}"/>
+                                <Text text="{VendorId}"/>
+                                <Label text="{i18n>paymentTerms}"/>
+                                <Text text="{PaymentTerms}"/>
+                            </form:SimpleForm>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
     </uxap:ObjectPageLayout>
 </mvc:View>
