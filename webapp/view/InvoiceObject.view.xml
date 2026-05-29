@@ -26,6 +26,26 @@
                 </uxap:snappedHeading>
                 <uxap:actions>
                     <Button
+                        icon="sap-icon://edit"
+                        text="{i18n>edit}"
+                        type="Emphasized"
+                        visible="{= !${editView>/editMode} }"
+                        press=".onEdit"/>
+                    <Button
+                        icon="sap-icon://save"
+                        text="{i18n>save}"
+                        type="Emphasized"
+                        visible="{editView>/editMode}"
+                        enabled="{= !${editView>/busy} }"
+                        press=".onSave"/>
+                    <Button
+                        icon="sap-icon://decline"
+                        text="{i18n>cancel}"
+                        type="Transparent"
+                        visible="{editView>/editMode}"
+                        enabled="{= !${editView>/busy} }"
+                        press=".onCancel"/>
+                    <Button
                         icon="sap-icon://nav-back"
                         text="{i18n>back}"
                         type="Transparent"
@@ -118,7 +138,14 @@
                                     formatOptions: {
                                         style: 'medium'
                                     }
-                                }"/>
+                                }" visible="{= !${editView>/editMode} }"/>
+                                <DatePicker
+                                    dateValue="{editView>/data/DueDate}"
+                                    displayFormat="medium"
+                                    valueFormat="yyyy-MM-dd"
+                                    valueState="{editView>/valueState/DueDate}"
+                                    valueStateText="{i18n>dueDateValidationError}"
+                                    visible="{editView>/editMode}"/>
                                 <Label text="{i18n>postingDate}"/>
                                 <Text text="{
                                     path: 'PostingDate',
@@ -160,7 +187,16 @@
                                     unit="{Currency}"
                                     emphasized="true"/>
                                 <Label text="{i18n>currency}"/>
-                                <Text text="{Currency}"/>
+                                <Text
+                                    text="{Currency}"
+                                    visible="{= !${editView>/editMode} }"/>
+                                <Input
+                                    value="{editView>/data/Currency}"
+                                    maxLength="3"
+                                    valueLiveUpdate="true"
+                                    valueState="{editView>/valueState/Currency}"
+                                    valueStateText="{i18n>currencyValidationError}"
+                                    visible="{editView>/editMode}"/>
                             </form:SimpleForm>
                         </uxap:blocks>
                     </uxap:ObjectPageSubSection>
@@ -181,7 +217,16 @@
                                 columnsL="2"
                                 columnsM="1">
                                 <Label text="{i18n>vendorName}"/>
-                                <Text text="{VendorName}"/>
+                                <Text
+                                    text="{VendorName}"
+                                    visible="{= !${editView>/editMode} }"/>
+                                <Input
+                                    value="{editView>/data/VendorName}"
+                                    maxLength="120"
+                                    valueLiveUpdate="true"
+                                    valueState="{editView>/valueState/VendorName}"
+                                    valueStateText="{i18n>vendorNameValidationError}"
+                                    visible="{editView>/editMode}"/>
                                 <Label text="{i18n>vendorId}"/>
                                 <Text text="{VendorId}"/>
                                 <Label text="{i18n>paymentTerms}"/>
