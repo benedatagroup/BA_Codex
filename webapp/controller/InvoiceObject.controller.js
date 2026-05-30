@@ -1,10 +1,11 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
+    "sap/ui/core/Fragment",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
     "bacodex/model/formatter"
-], function (Controller, JSONModel, MessageBox, MessageToast, formatter) {
+], function (Controller, Fragment, JSONModel, MessageBox, MessageToast, formatter) {
     "use strict";
 
     return Controller.extend("bacodex.controller.InvoiceObject", {
@@ -19,10 +20,22 @@ sap.ui.define([
                     Currency: "",
                     DueDate: null
                 },
+                itemData: {
+                    Description: "",
+                    Quantity: "1.000",
+                    UnitPrice: "0.00",
+                    TaxRate: "19.00"
+                },
                 valueState: {
                     VendorName: "None",
                     Currency: "None",
                     DueDate: "None"
+                },
+                itemValueState: {
+                    Description: "None",
+                    Quantity: "None",
+                    UnitPrice: "None",
+                    TaxRate: "None"
                 }
             }), "editView");
 
@@ -79,6 +92,70 @@ sap.ui.define([
             });
         },
 
+        onAddInvoiceItem: function () {
+            var oView = this.getView(),
+                oEditModel = oView.getModel("editView");
+
+            if (!oView.getBindingContext()) {
+                return;
+            }
+
+            oEditModel.setProperty("/itemData", {
+                Description: "",
+                Quantity: "1.000",
+                UnitPrice: "0.00",
+                TaxRate: "19.00"
+            });
+            oEditModel.setProperty("/itemValueState", this._getInitialItemValueState());
+
+            if (!this._pItemDialog) {
+                this._pItemDialog = Fragment.load({
+                    id: oView.getId(),
+                    name: "bacodex.view.InvoiceItemDialog",
+                    controller: this
+                }).then(function (oDialog) {
+                    oView.addDependent(oDialog);
+                    return oDialog;
+                });
+            }
+
+            this._pItemDialog.then(function (oDialog) {
+                oDialog.open();
+            });
+        },
+
+        onSaveInvoiceItem: function () {
+            var oView = this.getView(),
+                oModel = oView.getModel(),
+                oContext = oView.getBindingContext(),
+                oEditModel = oView.getModel("editView"),
+                oItemData = oEditModel.getProperty("/itemData"),
+                oParsedItem = this._validateInvoiceItemData(oItemData);
+
+            if (!oContext || !oParsedItem.valid) {
+                MessageBox.error(this._getText("invoiceValidationError"));
+                return;
+            }
+
+            oEditModel.setProperty("/busy", true);
+
+            oModel.create("/InvoiceItems", this._createInvoiceItemPayload(oContext, oParsedItem), {
+                success: function () {
+                    MessageToast.show(this._getText("invoiceItemSaveSuccess"));
+                    this._closeItemDialog();
+                    this._recalculateInvoiceAmounts(oContext);
+                }.bind(this),
+                error: function () {
+                    MessageBox.error(this._getText("invoiceItemSaveError"));
+                    oEditModel.setProperty("/busy", false);
+                }.bind(this)
+            });
+        },
+
+        onCancelInvoiceItem: function () {
+            this._closeItemDialog();
+        },
+
         _onObjectMatched: function (oEvent) {
             var sInvoiceId = decodeURIComponent(oEvent.getParameter("arguments").invoiceId),
                 sPath = this.getOwnerComponent().getModel().createKey("/Invoices", {
@@ -123,6 +200,7 @@ sap.ui.define([
                 Currency: "None",
                 DueDate: "None"
             });
+            oEditModel.setProperty("/itemValueState", this._getInitialItemValueState());
         },
 
         _resetEditState: function () {
@@ -179,6 +257,144 @@ sap.ui.define([
             this.getView().getModel("editView").setProperty("/valueState", oValueState);
 
             return bValid;
+        },
+
+        _validateInvoiceItemData: function (oData) {
+            var oValueState = this._getInitialItemValueState(),
+                fQuantity = this._parseDecimal(oData.Quantity),
+                fUnitPrice = this._parseDecimal(oData.UnitPrice),
+                fTaxRate = this._parseDecimal(oData.TaxRate),
+                bValid = true;
+
+            if (!oData.Description || !oData.Description.trim()) {
+                oValueState.Description = "Error";
+                bValid = false;
+            }
+
+            if (Number.isNaN(fQuantity) || fQuantity <= 0) {
+                oValueState.Quantity = "Error";
+                bValid = false;
+            }
+
+            if (Number.isNaN(fUnitPrice) || fUnitPrice < 0) {
+                oValueState.UnitPrice = "Error";
+                bValid = false;
+            }
+
+            if (Number.isNaN(fTaxRate) || fTaxRate < 0) {
+                oValueState.TaxRate = "Error";
+                bValid = false;
+            }
+
+            this.getView().getModel("editView").setProperty("/itemValueState", oValueState);
+
+            return {
+                valid: bValid,
+                Description: bValid ? oData.Description.trim() : "",
+                Quantity: fQuantity,
+                UnitPrice: fUnitPrice,
+                TaxRate: fTaxRate
+            };
+        },
+
+        _createInvoiceItemPayload: function (oInvoiceContext, oParsedItem) {
+            var fNetAmount = this._roundCurrency(oParsedItem.Quantity * oParsedItem.UnitPrice),
+                fTaxAmount = this._roundCurrency(fNetAmount * oParsedItem.TaxRate / 100),
+                fGrossAmount = this._roundCurrency(fNetAmount + fTaxAmount);
+
+            return {
+                InvoiceId: oInvoiceContext.getProperty("InvoiceId"),
+                ItemId: this._getNextItemId(),
+                Description: oParsedItem.Description,
+                Quantity: oParsedItem.Quantity.toFixed(3),
+                UnitPrice: oParsedItem.UnitPrice.toFixed(2),
+                TaxRate: oParsedItem.TaxRate.toFixed(2),
+                TaxCode: "V1",
+                NetAmount: fNetAmount.toFixed(2),
+                TaxAmount: fTaxAmount.toFixed(2),
+                GrossAmount: fGrossAmount.toFixed(2)
+            };
+        },
+
+        _getNextItemId: function () {
+            var oTable = this.byId("invoiceItemsTable"),
+                oBinding = oTable && oTable.getBinding("items"),
+                aContexts = oBinding ? oBinding.getContexts(0, oBinding.getLength()) : [],
+                iMaxItemId = aContexts.reduce(function (iMax, oContext) {
+                    return Math.max(iMax, Number(oContext.getProperty("ItemId")) || 0);
+                }, 0);
+
+            return String(iMaxItemId + 10);
+        },
+
+        _recalculateInvoiceAmounts: function (oInvoiceContext) {
+            var oView = this.getView(),
+                oModel = oView.getModel(),
+                oEditModel = oView.getModel("editView");
+
+            oModel.read(oInvoiceContext.getPath() + "/ToItems", {
+                success: function (oData) {
+                    var oAmounts = this._sumInvoiceItemAmounts(oData.results || []);
+
+                    oModel.update(oInvoiceContext.getPath(), {
+                        NetAmount: oAmounts.NetAmount.toFixed(2),
+                        TaxAmount: oAmounts.TaxAmount.toFixed(2),
+                        GrossAmount: oAmounts.GrossAmount.toFixed(2)
+                    }, {
+                        success: function () {
+                            oModel.refresh(true);
+                            oEditModel.setProperty("/busy", false);
+                        },
+                        error: function () {
+                            MessageBox.error(this._getText("invoiceSaveError"));
+                            oEditModel.setProperty("/busy", false);
+                        }.bind(this)
+                    });
+                }.bind(this),
+                error: function () {
+                    MessageBox.error(this._getText("invoiceSaveError"));
+                    oEditModel.setProperty("/busy", false);
+                }.bind(this)
+            });
+        },
+
+        _sumInvoiceItemAmounts: function (aItems) {
+            return aItems.reduce(function (oTotals, oItem) {
+                oTotals.NetAmount += Number(oItem.NetAmount) || 0;
+                oTotals.TaxAmount += Number(oItem.TaxAmount) || 0;
+                oTotals.GrossAmount += Number(oItem.GrossAmount) || 0;
+
+                return oTotals;
+            }, {
+                NetAmount: 0,
+                TaxAmount: 0,
+                GrossAmount: 0
+            });
+        },
+
+        _closeItemDialog: function () {
+            if (this._pItemDialog) {
+                this._pItemDialog.then(function (oDialog) {
+                    oDialog.close();
+                });
+            }
+        },
+
+        _getInitialItemValueState: function () {
+            return {
+                Description: "None",
+                Quantity: "None",
+                UnitPrice: "None",
+                TaxRate: "None"
+            };
+        },
+
+        _parseDecimal: function (vValue) {
+            return Number(String(vValue).replace(",", "."));
+        },
+
+        _roundCurrency: function (fValue) {
+            return Math.round((fValue + Number.EPSILON) * 100) / 100;
         },
 
         _getText: function (sKey) {

@@ -202,6 +202,72 @@
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
             </uxap:ObjectPageSection>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionItems}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <Table
+                                id="invoiceItemsTable"
+                                mode="None"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                sticky="ColumnHeaders"
+                                width="auto"
+                                items="{
+                                    path: 'ToItems',
+                                    parameters: {
+                                        select: 'InvoiceId,ItemId,Description,Quantity,UnitPrice,TaxRate,NetAmount'
+                                    },
+                                    sorter: {
+                                        path: 'ItemId'
+                                    }
+                                }">
+                                <headerToolbar>
+                                    <OverflowToolbar>
+                                        <Title text="{i18n>invoiceItemsTableTitle}" level="H2"/>
+                                        <ToolbarSpacer/>
+                                        <Button
+                                            icon="sap-icon://add"
+                                            text="{i18n>add}"
+                                            type="Emphasized"
+                                            visible="{editView>/editMode}"
+                                            enabled="{= !${editView>/busy} }"
+                                            press=".onAddInvoiceItem"/>
+                                    </OverflowToolbar>
+                                </headerToolbar>
+                                <columns>
+                                    <Column minScreenWidth="Phone" demandPopin="false">
+                                        <Text text="{i18n>itemDescription}"/>
+                                    </Column>
+                                    <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+                                        <Text text="{i18n>itemQuantity}"/>
+                                    </Column>
+                                    <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+                                        <Text text="{i18n>itemUnitPrice}"/>
+                                    </Column>
+                                    <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+                                        <Text text="{i18n>itemTaxRate}"/>
+                                    </Column>
+                                    <Column hAlign="End" minScreenWidth="Phone" demandPopin="false">
+                                        <Text text="{i18n>itemAmount}"/>
+                                    </Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{Description}"/>
+                                            <Text text="{path: 'Quantity', formatter: '.formatter.quantity'}" textAlign="End"/>
+                                            <ObjectNumber number="{path: 'UnitPrice', formatter: '.formatter.amount'}"/>
+                                            <Text text="{path: 'TaxRate', formatter: '.formatter.percent'}" textAlign="End"/>
+                                            <ObjectNumber number="{path: 'NetAmount', formatter: '.formatter.amount'}"/>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
             <uxap:ObjectPageSection title="{i18n>invoiceSectionBusinessPartner}" titleUppercase="false">
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection>

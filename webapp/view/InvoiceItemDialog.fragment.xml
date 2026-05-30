@@ -1,0 +1,63 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+    <Dialog
+        id="invoiceItemDialog"
+        title="{i18n>invoiceItemDialogTitle}">
+        <content>
+            <form:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="4"
+                labelSpanM="4"
+                labelSpanS="12"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1">
+                <Label text="{i18n>itemDescription}" required="true"/>
+                <Input
+                    value="{editView>/itemData/Description}"
+                    maxLength="120"
+                    valueLiveUpdate="true"
+                    valueState="{editView>/itemValueState/Description}"
+                    valueStateText="{i18n>itemDescriptionValidationError}"/>
+                <Label text="{i18n>itemQuantity}" required="true"/>
+                <Input
+                    value="{editView>/itemData/Quantity}"
+                    type="Number"
+                    valueLiveUpdate="true"
+                    valueState="{editView>/itemValueState/Quantity}"
+                    valueStateText="{i18n>itemQuantityValidationError}"/>
+                <Label text="{i18n>itemUnitPrice}" required="true"/>
+                <Input
+                    value="{editView>/itemData/UnitPrice}"
+                    type="Number"
+                    valueLiveUpdate="true"
+                    valueState="{editView>/itemValueState/UnitPrice}"
+                    valueStateText="{i18n>itemUnitPriceValidationError}"/>
+                <Label text="{i18n>itemTaxRate}" required="true"/>
+                <Input
+                    value="{editView>/itemData/TaxRate}"
+                    type="Number"
+                    valueLiveUpdate="true"
+                    valueState="{editView>/itemValueState/TaxRate}"
+                    valueStateText="{i18n>itemTaxRateValidationError}"/>
+            </form:SimpleForm>
+        </content>
+        <beginButton>
+            <Button
+                text="{i18n>save}"
+                type="Emphasized"
+                enabled="{= !${editView>/busy} }"
+                press=".onSaveInvoiceItem"/>
+        </beginButton>
+        <endButton>
+            <Button
+                text="{i18n>cancel}"
+                enabled="{= !${editView>/busy} }"
+                press=".onCancelInvoiceItem"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

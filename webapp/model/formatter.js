@@ -24,6 +24,32 @@ sap.ui.define([], function () {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
+        },
+
+        quantity: function (vQuantity) {
+            var fQuantity = Number(vQuantity);
+
+            if (Number.isNaN(fQuantity)) {
+                return "";
+            }
+
+            return fQuantity.toLocaleString(undefined, {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            });
+        },
+
+        percent: function (vPercent) {
+            var fPercent = Number(vPercent);
+
+            if (Number.isNaN(fPercent)) {
+                return "";
+            }
+
+            return fPercent.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + " %";
         }
     };
 });
