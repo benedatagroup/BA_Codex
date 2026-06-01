@@ -7,6 +7,7 @@ sap.ui.define([
     "bacodex/model/formatter"
 ], function (Controller, Fragment, JSONModel, MessageBox, MessageToast, formatter) {
     "use strict";
+    /* global Promise */
 
     return Controller.extend("bacodex.controller.InvoiceObject", {
         formatter: formatter,
@@ -336,20 +337,27 @@ sap.ui.define([
                 success: function (oData) {
                     var oAmounts = this._sumInvoiceItemAmounts(oData.results || []);
 
-                    oModel.update(oInvoiceContext.getPath(), {
-                        NetAmount: oAmounts.NetAmount.toFixed(2),
-                        TaxAmount: oAmounts.TaxAmount.toFixed(2),
-                        GrossAmount: oAmounts.GrossAmount.toFixed(2)
-                    }, {
-                        success: function () {
-                            oModel.refresh(true);
-                            oEditModel.setProperty("/busy", false);
-                        },
-                        error: function () {
+                    this._syncInvoiceTaxItems(oInvoiceContext, oAmounts.TaxItems)
+                        .then(function () {
+                            oModel.update(oInvoiceContext.getPath(), {
+                                NetAmount: oAmounts.NetAmount.toFixed(2),
+                                TaxAmount: oAmounts.TaxAmount.toFixed(2),
+                                GrossAmount: oAmounts.GrossAmount.toFixed(2)
+                            }, {
+                                success: function () {
+                                    oModel.refresh(true);
+                                    oEditModel.setProperty("/busy", false);
+                                },
+                                error: function () {
+                                    MessageBox.error(this._getText("invoiceSaveError"));
+                                    oEditModel.setProperty("/busy", false);
+                                }.bind(this)
+                            });
+                        }.bind(this))
+                        .catch(function () {
                             MessageBox.error(this._getText("invoiceSaveError"));
                             oEditModel.setProperty("/busy", false);
-                        }.bind(this)
-                    });
+                        }.bind(this));
                 }.bind(this),
                 error: function () {
                     MessageBox.error(this._getText("invoiceSaveError"));
@@ -359,16 +367,112 @@ sap.ui.define([
         },
 
         _sumInvoiceItemAmounts: function (aItems) {
-            return aItems.reduce(function (oTotals, oItem) {
-                oTotals.NetAmount += Number(oItem.NetAmount) || 0;
-                oTotals.TaxAmount += Number(oItem.TaxAmount) || 0;
-                oTotals.GrossAmount += Number(oItem.GrossAmount) || 0;
+            var mTaxItemsByRate = {},
+                oTotals = aItems.reduce(function (oResult, oItem) {
+                    var fNetAmount = Number(oItem.NetAmount) || 0,
+                        fTaxRate = Number(oItem.TaxRate) || 0,
+                        sTaxRate = fTaxRate.toFixed(2);
 
-                return oTotals;
-            }, {
+                    oResult.NetAmount += fNetAmount;
+                    oResult.TaxAmount += Number(oItem.TaxAmount) || 0;
+                    oResult.GrossAmount += Number(oItem.GrossAmount) || 0;
+
+                    if (!mTaxItemsByRate[sTaxRate]) {
+                        mTaxItemsByRate[sTaxRate] = {
+                            TaxRate: fTaxRate,
+                            TaxBase: 0
+                        };
+                    }
+
+                    mTaxItemsByRate[sTaxRate].TaxBase += fNetAmount;
+
+                    return oResult;
+                }, {
                 NetAmount: 0,
                 TaxAmount: 0,
-                GrossAmount: 0
+                GrossAmount: 0,
+                TaxItems: []
+            });
+
+            oTotals.TaxItems = Object.keys(mTaxItemsByRate).sort(function (sFirstRate, sSecondRate) {
+                return Number(sFirstRate) - Number(sSecondRate);
+            }).map(function (sTaxRate) {
+                var oTaxItem = mTaxItemsByRate[sTaxRate],
+                    fTaxBase = this._roundCurrency(oTaxItem.TaxBase),
+                    fTaxAmount = this._roundCurrency(fTaxBase * oTaxItem.TaxRate / 100);
+
+                return {
+                    TaxRate: oTaxItem.TaxRate,
+                    TaxBase: fTaxBase,
+                    TaxAmount: fTaxAmount
+                };
+            }.bind(this));
+
+            oTotals.TaxAmount = oTotals.TaxItems.reduce(function (fTotal, oTaxItem) {
+                return fTotal + oTaxItem.TaxAmount;
+            }, 0);
+            oTotals.GrossAmount = oTotals.NetAmount + oTotals.TaxAmount;
+
+            return oTotals;
+        },
+
+        _syncInvoiceTaxItems: function (oInvoiceContext, aTaxItems) {
+            var oModel = this.getView().getModel(),
+                sInvoiceId = oInvoiceContext.getProperty("InvoiceId");
+
+            return this._readNavigation(oInvoiceContext.getPath() + "/ToTaxItems")
+                .then(function (aExistingTaxItems) {
+                    return Promise.all(aExistingTaxItems.map(function (oTaxItem) {
+                        return this._removeEntity(oModel.createKey("/TaxItems", {
+                            TaxItemId: oTaxItem.TaxItemId
+                        }));
+                    }.bind(this)));
+                }.bind(this))
+                .then(function () {
+                    return Promise.all(aTaxItems.map(function (oTaxItem, iIndex) {
+                        return this._createEntity("/TaxItems", {
+                            TaxItemId: sInvoiceId + "-TAX-" + String(iIndex + 1).padStart(3, "0"),
+                            InvoiceId: sInvoiceId,
+                            TaxRate: oTaxItem.TaxRate.toFixed(2),
+                            TaxBase: oTaxItem.TaxBase.toFixed(2),
+                            TaxAmount: oTaxItem.TaxAmount.toFixed(2)
+                        });
+                    }.bind(this)));
+                }.bind(this));
+        },
+
+        _readNavigation: function (sPath) {
+            var oModel = this.getView().getModel();
+
+            return new Promise(function (resolve, reject) {
+                oModel.read(sPath, {
+                    success: function (oData) {
+                        resolve(oData.results || []);
+                    },
+                    error: reject
+                });
+            });
+        },
+
+        _createEntity: function (sPath, oPayload) {
+            var oModel = this.getView().getModel();
+
+            return new Promise(function (resolve, reject) {
+                oModel.create(sPath, oPayload, {
+                    success: resolve,
+                    error: reject
+                });
+            });
+        },
+
+        _removeEntity: function (sPath) {
+            var oModel = this.getView().getModel();
+
+            return new Promise(function (resolve, reject) {
+                oModel.remove(sPath, {
+                    success: resolve,
+                    error: reject
+                });
             });
         },
 

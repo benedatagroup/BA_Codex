@@ -268,6 +268,58 @@
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
             </uxap:ObjectPageSection>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionTaxItems}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <Table
+                                id="taxItemsTable"
+                                mode="None"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                sticky="ColumnHeaders"
+                                width="auto"
+                                items="{
+                                    path: 'ToTaxItems',
+                                    parameters: {
+                                        select: 'InvoiceId,TaxItemId,TaxRate,TaxBase,TaxAmount'
+                                    },
+                                    sorter: {
+                                        path: 'TaxRate'
+                                    }
+                                }">
+                                <headerToolbar>
+                                    <OverflowToolbar>
+                                        <Title text="{i18n>taxItemsTableTitle}" level="H2"/>
+                                    </OverflowToolbar>
+                                </headerToolbar>
+                                <columns>
+                                    <Column hAlign="End" minScreenWidth="Phone" demandPopin="false">
+                                        <Text text="{i18n>itemTaxRate}"/>
+                                    </Column>
+                                    <Column hAlign="End" minScreenWidth="Phone" demandPopin="false">
+                                        <Text text="{i18n>taxBase}"/>
+                                    </Column>
+                                    <Column hAlign="End" minScreenWidth="Phone" demandPopin="false">
+                                        <Text text="{i18n>taxAmount}"/>
+                                    </Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{path: 'TaxRate', formatter: '.formatter.percent'}" textAlign="End"/>
+                                            <ObjectNumber
+                                                number="{path: 'TaxBase', formatter: '.formatter.amount'}"/>
+                                            <ObjectNumber
+                                                number="{path: 'TaxAmount', formatter: '.formatter.amount'}"/>
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
             <uxap:ObjectPageSection title="{i18n>invoiceSectionBusinessPartner}" titleUppercase="false">
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection>
