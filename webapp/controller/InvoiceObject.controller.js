@@ -2,10 +2,12 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/core/Fragment",
     "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
     "bacodex/model/formatter"
-], function (Controller, Fragment, JSONModel, MessageBox, MessageToast, formatter) {
+], function (Controller, Fragment, JSONModel, Filter, FilterOperator, MessageBox, MessageToast, formatter) {
     "use strict";
     /* global Promise */
 
@@ -19,8 +21,10 @@ sap.ui.define([
                 data: {
                     VendorName: "",
                     Currency: "",
-                    DueDate: null
+                    DueDate: null,
+                    NoteText: ""
                 },
+                noteExists: false,
                 itemData: {
                     Description: "",
                     Quantity: "1.000",
@@ -50,14 +54,15 @@ sap.ui.define([
         },
 
         onEdit: function () {
-            var oContext = this.getView().getBindingContext();
+            var oContext = this.getView().getBindingContext(),
+                oEditModel = this.getView().getModel("editView");
 
             if (!oContext) {
                 return;
             }
 
             this._setEditData(oContext.getObject());
-            this.getView().getModel("editView").setProperty("/editMode", true);
+            oEditModel.setProperty("/editMode", true);
         },
 
         onCancel: function () {
@@ -83,8 +88,16 @@ sap.ui.define([
                 DueDate: oData.DueDate
             }, {
                 success: function () {
-                    MessageToast.show(this._getText("invoiceSaveSuccess"));
-                    this._resetEditState();
+                    this._syncInvoiceNote(oContext, oData.NoteText)
+                        .then(function () {
+                            MessageToast.show(this._getText("invoiceSaveSuccess"));
+                            this._resetEditState();
+                            oView.getModel().refresh(true);
+                        }.bind(this))
+                        .catch(function () {
+                            MessageBox.error(this._getText("invoiceSaveError"));
+                            oEditModel.setProperty("/busy", false);
+                        }.bind(this));
                 }.bind(this),
                 error: function () {
                     MessageBox.error(this._getText("invoiceSaveError"));
@@ -164,6 +177,7 @@ sap.ui.define([
                 });
 
             this._resetEditState();
+            this._clearEditData();
 
             this.getView().bindElement({
                 path: sPath,
@@ -184,24 +198,69 @@ sap.ui.define([
                         "PaymentTerms",
                         "CompanyCode"
                     ].join(",")
+                },
+                events: {
+                    change: function () {
+                        this._setCurrentInvoiceEditData(sInvoiceId);
+                    }.bind(this),
+                    dataReceived: function () {
+                        this._setCurrentInvoiceEditData(sInvoiceId);
+                    }.bind(this)
                 }
             });
         },
 
-        _setEditData: function (oInvoice) {
-            var oEditModel = this.getView().getModel("editView");
+        _setCurrentInvoiceEditData: function (sInvoiceId) {
+            var oContext = this.getView().getBindingContext();
+
+            if (oContext) {
+                this._setEditData(oContext.getObject());
+            }
+            this._loadInvoiceNote(sInvoiceId);
+        },
+
+        _setEditData: function (oInvoice, oNote) {
+            var oEditModel = this.getView().getModel("editView"),
+                sNoteText = oEditModel.getProperty("/data/NoteText"),
+                bNoteExists = oEditModel.getProperty("/noteExists");
+
+            if (arguments.length > 1) {
+                sNoteText = oNote && oNote.NoteText ? oNote.NoteText : "";
+                bNoteExists = !!oNote;
+            }
 
             oEditModel.setProperty("/data", {
                 VendorName: oInvoice.VendorName || "",
                 Currency: oInvoice.Currency || "",
-                DueDate: oInvoice.DueDate ? new Date(oInvoice.DueDate.getTime()) : null
+                DueDate: oInvoice.DueDate ? new Date(oInvoice.DueDate.getTime()) : null,
+                NoteText: sNoteText
             });
+            oEditModel.setProperty("/noteExists", bNoteExists);
             oEditModel.setProperty("/valueState", {
                 VendorName: "None",
                 Currency: "None",
                 DueDate: "None"
             });
             oEditModel.setProperty("/itemValueState", this._getInitialItemValueState());
+        },
+
+        _clearEditData: function () {
+            var oEditModel = this.getView().getModel("editView");
+
+            oEditModel.setProperty("/data", {
+                VendorName: "",
+                Currency: "",
+                DueDate: null,
+                NoteText: ""
+            });
+            oEditModel.setProperty("/noteExists", false);
+        },
+
+        _setNoteData: function (oNote) {
+            var oEditModel = this.getView().getModel("editView");
+
+            oEditModel.setProperty("/data/NoteText", oNote && oNote.NoteText ? oNote.NoteText : "");
+            oEditModel.setProperty("/noteExists", !!oNote);
         },
 
         _resetEditState: function () {
@@ -258,6 +317,69 @@ sap.ui.define([
             this.getView().getModel("editView").setProperty("/valueState", oValueState);
 
             return bValid;
+        },
+
+        _loadInvoiceNote: function (sInvoiceId) {
+            this._readInvoiceNote(sInvoiceId)
+                .then(function (oNote) {
+                    var oContext = this.getView().getBindingContext();
+
+                    if (oContext && oContext.getProperty("InvoiceId") === sInvoiceId) {
+                        this._setNoteData(oNote);
+                    }
+                }.bind(this))
+                .catch(function () {
+                    var oContext = this.getView().getBindingContext();
+
+                    if (oContext && oContext.getProperty("InvoiceId") === sInvoiceId) {
+                        this._setNoteData(null);
+                    }
+                }.bind(this));
+        },
+
+        _readInvoiceNote: function (sInvoiceId) {
+            var oModel = this.getView().getModel();
+
+            return new Promise(function (resolve, reject) {
+                oModel.read("/Notes", {
+                    filters: [
+                        new Filter("InvoiceId", FilterOperator.EQ, sInvoiceId)
+                    ],
+                    success: function (oData) {
+                        resolve((oData.results || [])[0] || null);
+                    },
+                    error: reject
+                });
+            });
+        },
+
+        _syncInvoiceNote: function (oInvoiceContext, sNoteText) {
+            var oEditModel = this.getView().getModel("editView"),
+                sInvoiceId = oInvoiceContext.getProperty("InvoiceId"),
+                sNotePath = this.getView().getModel().createKey("/Notes", {
+                    InvoiceId: sInvoiceId
+                }),
+                oPayload = {
+                    InvoiceId: sInvoiceId,
+                    NoteText: sNoteText || "",
+                    CreatedBy: "AP_CLERK"
+                };
+
+            if (oEditModel.getProperty("/noteExists")) {
+                return this._updateEntity(sNotePath, oPayload)
+                    .then(function () {
+                        this._setNoteData(oPayload);
+                    }.bind(this));
+            }
+
+            if (!oPayload.NoteText) {
+                return Promise.resolve();
+            }
+
+            return this._createEntity("/Notes", oPayload)
+                .then(function () {
+                    this._setNoteData(oPayload);
+                }.bind(this));
         },
 
         _validateInvoiceItemData: function (oData) {
@@ -447,8 +569,19 @@ sap.ui.define([
             return new Promise(function (resolve, reject) {
                 oModel.read(sPath, {
                     success: function (oData) {
-                        resolve(oData.results || []);
+                        resolve(oData.results || oData);
                     },
+                    error: reject
+                });
+            });
+        },
+
+        _updateEntity: function (sPath, oPayload) {
+            var oModel = this.getView().getModel();
+
+            return new Promise(function (resolve, reject) {
+                oModel.update(sPath, oPayload, {
+                    success: resolve,
                     error: reject
                 });
             });

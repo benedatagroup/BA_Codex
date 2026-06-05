@@ -354,6 +354,34 @@
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
             </uxap:ObjectPageSection>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionNotes}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <form:SimpleForm
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="2"
+                                labelSpanL="2"
+                                labelSpanM="3"
+                                labelSpanS="12"
+                                columnsXL="1"
+                                columnsL="1"
+                                columnsM="1">
+                                <Label text="{i18n>noteText}"/>
+                                <TextArea
+                                    id="invoiceNoteTextArea"
+                                    value="{editView>/data/NoteText}"
+                                    editable="{editView>/editMode}"
+                                    valueLiveUpdate="true"
+                                    maxLength="500"
+                                    rows="6"
+                                    width="100%"/>
+                            </form:SimpleForm>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
         </uxap:sections>
     </uxap:ObjectPageLayout>
 </mvc:View>
