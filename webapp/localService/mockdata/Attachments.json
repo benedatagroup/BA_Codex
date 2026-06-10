@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "AttachmentId": "INV-001-ATT-001",
+    "InvoiceId": "INV-001",
+    "FileName": "Rechnung-2026-10001.pdf",
+    "FileType": "PDF",
+    "FileSize": 245760,
+    "MimeType": "application/pdf"
+  },
+  {
+    "AttachmentId": "INV-001-ATT-002",
+    "InvoiceId": "INV-001",
+    "FileName": "Lieferschein-4711.png",
+    "FileType": "PNG",
+    "FileSize": 98304,
+    "MimeType": "image/png"
+  },
+  {
+    "AttachmentId": "INV-002-ATT-001",
+    "InvoiceId": "INV-002",
+    "FileName": "Leistungsnachweis.xlsx",
+    "FileType": "XLSX",
+    "FileSize": 38912,
+    "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  }
+]

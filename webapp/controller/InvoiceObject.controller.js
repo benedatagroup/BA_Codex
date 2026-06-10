@@ -66,6 +66,7 @@ sap.ui.define([
         },
 
         onCancel: function () {
+            this._clearAttachmentUploadState();
             this._resetEditState();
         },
 
@@ -91,6 +92,7 @@ sap.ui.define([
                     this._syncInvoiceNote(oContext, oData.NoteText)
                         .then(function () {
                             MessageToast.show(this._getText("invoiceSaveSuccess"));
+                            this._clearAttachmentUploadState();
                             this._resetEditState();
                             oView.getModel().refresh(true);
                         }.bind(this))
@@ -170,6 +172,30 @@ sap.ui.define([
             this._closeItemDialog();
         },
 
+        onAttachmentAdded: function (oEvent) {
+            var oView = this.getView(),
+                oContext = oView.getBindingContext(),
+                oUploadSet = this.byId("attachmentUploadSet"),
+                oItem = oEvent.getParameter("item"),
+                oPayload;
+
+            if (!oContext || !oItem) {
+                return;
+            }
+
+            oPayload = this._createAttachmentPayload(oContext, oItem);
+            this._removePendingAttachmentItem(oUploadSet, oItem);
+
+            this._createEntity("/Attachments", oPayload)
+                .then(function () {
+                    MessageToast.show(this._getText("attachmentUploadSuccess"));
+                    this._refreshAttachmentList();
+                }.bind(this))
+                .catch(function () {
+                    MessageBox.error(this._getText("attachmentUploadError"));
+                });
+        },
+
         _onObjectMatched: function (oEvent) {
             var sInvoiceId = decodeURIComponent(oEvent.getParameter("arguments").invoiceId),
                 sPath = this.getOwnerComponent().getModel().createKey("/Invoices", {
@@ -178,6 +204,7 @@ sap.ui.define([
 
             this._resetEditState();
             this._clearEditData();
+            this._clearAttachmentUploadState();
 
             this.getView().bindElement({
                 path: sPath,
@@ -439,6 +466,22 @@ sap.ui.define([
             };
         },
 
+        _createAttachmentPayload: function (oInvoiceContext, oUploadItem) {
+            var oFile = oUploadItem.getFileObject ? oUploadItem.getFileObject() : null,
+                sFileName = oUploadItem.getFileName ? oUploadItem.getFileName() : "",
+                sMimeType = oFile && oFile.type ? oFile.type : this._getMimeTypeFromFileName(sFileName),
+                sFileType = this._getFileType(sFileName, sMimeType);
+
+            return {
+                AttachmentId: this._getNextAttachmentId(oInvoiceContext.getProperty("InvoiceId")),
+                InvoiceId: oInvoiceContext.getProperty("InvoiceId"),
+                FileName: sFileName,
+                FileType: sFileType,
+                FileSize: oFile && oFile.size ? oFile.size : 0,
+                MimeType: sMimeType
+            };
+        },
+
         _getNextItemId: function () {
             var oTable = this.byId("invoiceItemsTable"),
                 oBinding = oTable && oTable.getBinding("items"),
@@ -448,6 +491,81 @@ sap.ui.define([
                 }, 0);
 
             return String(iMaxItemId + 10);
+        },
+
+        _getNextAttachmentId: function (sInvoiceId) {
+            var oUploadSet = this.byId("attachmentUploadSet"),
+                oBinding = oUploadSet && oUploadSet.getBinding("items"),
+                aContexts = oBinding ? oBinding.getContexts(0, oBinding.getLength()) : [],
+                iMaxAttachmentIndex = aContexts.reduce(function (iMax, oContext) {
+                    var sAttachmentId = oContext.getProperty("AttachmentId") || "",
+                        iIndex = Number(sAttachmentId.split("-ATT-").pop()) || 0;
+
+                    return Math.max(iMax, iIndex);
+                }, 0);
+
+            return sInvoiceId + "-ATT-" + String(iMaxAttachmentIndex + 1).padStart(3, "0");
+        },
+
+        _refreshAttachmentList: function () {
+            var oUploadSet = this.byId("attachmentUploadSet"),
+                oBinding = oUploadSet && oUploadSet.getBinding("items");
+
+            if (oBinding) {
+                oBinding.refresh(true);
+            }
+        },
+
+        _clearAttachmentUploadState: function () {
+            var oUploadSet = this.byId("attachmentUploadSet"),
+                aIncompleteItems;
+
+            if (!oUploadSet || !oUploadSet.getIncompleteItems) {
+                return;
+            }
+
+            aIncompleteItems = oUploadSet.getIncompleteItems();
+            oUploadSet.removeAllIncompleteItems();
+            aIncompleteItems.forEach(function (oItem) {
+                oItem.destroy();
+            });
+        },
+
+        _removePendingAttachmentItem: function (oUploadSet, oItem) {
+            if (!oUploadSet || !oItem) {
+                return;
+            }
+
+            if (oUploadSet.indexOfIncompleteItem && oUploadSet.indexOfIncompleteItem(oItem) > -1) {
+                oUploadSet.removeIncompleteItem(oItem);
+                oItem.destroy();
+                return;
+            }
+
+            if (oUploadSet.indexOfItem && oUploadSet.indexOfItem(oItem) > -1 && oItem.getBindingContext && !oItem.getBindingContext()) {
+                oUploadSet.removeItem(oItem);
+                oItem.destroy();
+            }
+        },
+
+        _getFileType: function (sFileName, sMimeType) {
+            var iExtensionStart = sFileName.lastIndexOf(".");
+
+            if (iExtensionStart > -1 && iExtensionStart < sFileName.length - 1) {
+                return sFileName.substring(iExtensionStart + 1).toUpperCase();
+            }
+
+            if (sMimeType && sMimeType.indexOf("/") > -1) {
+                return sMimeType.split("/").pop().toUpperCase();
+            }
+
+            return this._getText("fileTypeUnknown");
+        },
+
+        _getMimeTypeFromFileName: function (sFileName) {
+            var sFileType = this._getFileType(sFileName, "");
+
+            return sFileType === this._getText("fileTypeUnknown") ? "application/octet-stream" : "application/" + sFileType.toLowerCase();
         },
 
         _recalculateInvoiceAmounts: function (oInvoiceContext) {

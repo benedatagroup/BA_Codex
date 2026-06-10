@@ -4,6 +4,7 @@
     xmlns="sap.m"
     xmlns:form="sap.ui.layout.form"
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:upload="sap.m.upload"
     xmlns:uxap="sap.uxap">
     <uxap:ObjectPageLayout
         id="invoiceObjectPage"
@@ -316,6 +317,49 @@
                                     </ColumnListItem>
                                 </items>
                             </Table>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+            <uxap:ObjectPageSection title="{i18n>invoiceSectionAttachments}" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection>
+                        <uxap:blocks>
+                            <upload:UploadSet
+                                id="attachmentUploadSet"
+                                uploadEnabled="{editView>/editMode}"
+                                instantUpload="false"
+                                showIcons="true"
+                                afterItemAdded=".onAttachmentAdded"
+                                items="{
+                                    path: 'ToAttachments',
+                                    parameters: {
+                                        select: 'AttachmentId,InvoiceId,FileName,FileType,FileSize,MimeType'
+                                    },
+                                    sorter: {
+                                        path: 'FileName'
+                                    }
+                                }">
+                                <upload:toolbar>
+                                    <OverflowToolbar>
+                                        <Title text="{i18n>attachmentsTableTitle}" level="H2"/>
+                                        <ToolbarSpacer/>
+                                    </OverflowToolbar>
+                                </upload:toolbar>
+                                <upload:items>
+                                    <upload:UploadSetItem
+                                        fileName="{FileName}"
+                                        mediaType="{MimeType}"
+                                        visibleEdit="false"
+                                        visibleRemove="false">
+                                        <upload:attributes>
+                                            <ObjectAttribute
+                                                title="{i18n>fileType}"
+                                                text="{FileType}"/>
+                                        </upload:attributes>
+                                    </upload:UploadSetItem>
+                                </upload:items>
+                            </upload:UploadSet>
                         </uxap:blocks>
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
