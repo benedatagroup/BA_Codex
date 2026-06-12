@@ -1,0 +1,73 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+    <Dialog
+        id="invoiceCreateDialog"
+        title="{i18n>createInvoiceDialogTitle}"
+        contentWidth="36rem"
+        draggable="true"
+        resizable="true">
+        <content>
+            <form:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="4"
+                labelSpanM="4"
+                labelSpanS="12"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1">
+                <Label text="{i18n>invoiceNumber}" required="true"/>
+                <Input
+                    value="{createInvoice>/data/InvoiceNumber}"
+                    maxLength="30"
+                    valueLiveUpdate="true"
+                    valueState="{createInvoice>/valueState/InvoiceNumber}"
+                    valueStateText="{i18n>invoiceNumberValidationError}"/>
+                <Label text="{i18n>vendorName}" required="true"/>
+                <Input
+                    value="{createInvoice>/data/VendorName}"
+                    maxLength="120"
+                    valueLiveUpdate="true"
+                    valueState="{createInvoice>/valueState/VendorName}"
+                    valueStateText="{i18n>vendorNameValidationError}"/>
+                <Label text="{i18n>invoiceDate}" required="true"/>
+                <DatePicker
+                    dateValue="{createInvoice>/data/InvoiceDate}"
+                    displayFormat="medium"
+                    valueFormat="yyyy-MM-dd"
+                    valueState="{createInvoice>/valueState/InvoiceDate}"
+                    valueStateText="{i18n>invoiceDateValidationError}"/>
+                <Label text="{i18n>currency}" required="true"/>
+                <Input
+                    value="{createInvoice>/data/Currency}"
+                    maxLength="3"
+                    valueLiveUpdate="true"
+                    valueState="{createInvoice>/valueState/Currency}"
+                    valueStateText="{i18n>currencyValidationError}"/>
+                <Label text="{i18n>dueDate}"/>
+                <DatePicker
+                    dateValue="{createInvoice>/data/DueDate}"
+                    displayFormat="medium"
+                    valueFormat="yyyy-MM-dd"
+                    valueState="{createInvoice>/valueState/DueDate}"
+                    valueStateText="{i18n>dueDateCreateValidationError}"/>
+            </form:SimpleForm>
+        </content>
+        <beginButton>
+            <Button
+                text="{i18n>save}"
+                type="Emphasized"
+                enabled="{= !${createInvoice>/busy} }"
+                press=".onSaveNewInvoice"/>
+        </beginButton>
+        <endButton>
+            <Button
+                text="{i18n>cancel}"
+                enabled="{= !${createInvoice>/busy} }"
+                press=".onCancelNewInvoice"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

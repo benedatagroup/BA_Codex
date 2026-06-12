@@ -89,6 +89,11 @@
                     <OverflowToolbar>
                         <Title text="{i18n>invoiceTableTitle}" level="H2"/>
                         <ToolbarSpacer/>
+                        <Button
+                            icon="sap-icon://add"
+                            text="{i18n>createInvoice}"
+                            type="Emphasized"
+                            press=".onCreateInvoice"/>
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>
