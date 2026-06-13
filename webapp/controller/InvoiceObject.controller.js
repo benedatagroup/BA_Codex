@@ -108,6 +108,33 @@ sap.ui.define([
             });
         },
 
+        onPost: function () {
+            var oView = this.getView(),
+                oModel = oView.getModel(),
+                oContext = oView.getBindingContext(),
+                oEditModel = oView.getModel("editView");
+
+            if (!oContext || oContext.getProperty("Status") !== "Draft") {
+                return;
+            }
+
+            oEditModel.setProperty("/busy", true);
+
+            oModel.update(oContext.getPath(), {
+                Status: "Posted"
+            }, {
+                success: function () {
+                    MessageToast.show(this._getText("invoicePostSuccess"));
+                    this._resetEditState();
+                    oModel.refresh(true);
+                }.bind(this),
+                error: function () {
+                    MessageBox.error(this._getText("invoicePostError"));
+                    oEditModel.setProperty("/busy", false);
+                }.bind(this)
+            });
+        },
+
         onAddInvoiceItem: function () {
             var oView = this.getView(),
                 oEditModel = oView.getModel("editView");
