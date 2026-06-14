@@ -4,7 +4,10 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:f="sap.f"
-    xmlns:mvc="sap.ui.core.mvc">
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
     <f:DynamicPage id="invoiceListPage" fitContent="true">
         <f:title>
             <f:DynamicPageTitle>
@@ -71,71 +74,110 @@
             </f:DynamicPageHeader>
         </f:header>
         <f:content>
-            <Table
-                id="invoiceTable"
-                mode="None"
-                growing="true"
-                growingScrollToLoad="true"
-                sticky="ColumnHeaders"
-                width="auto"
-                items="{
-                    path: '/Invoices',
-                    sorter: {
-                        path: 'InvoiceDate',
-                        descending: true
-                    }
-                }">
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="{i18n>invoiceTableTitle}" level="H2"/>
-                        <ToolbarSpacer/>
-                        <Button
-                            icon="sap-icon://add"
-                            text="{i18n>createInvoice}"
-                            type="Emphasized"
-                            press=".onCreateInvoice"/>
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                    <Column minScreenWidth="Tablet" demandPopin="false">
-                        <Text text="{i18n>invoiceNumber}"/>
-                    </Column>
-                    <Column minScreenWidth="Tablet" demandPopin="false">
-                        <Text text="{i18n>vendorName}"/>
-                    </Column>
-                    <Column minScreenWidth="Tablet" demandPopin="true">
-                        <Text text="{i18n>invoiceDate}"/>
-                    </Column>
-                    <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
-                        <Text text="{i18n>grossAmount}"/>
-                    </Column>
-                    <Column minScreenWidth="Phone" demandPopin="false">
-                        <Text text="{i18n>status}"/>
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem type="Navigation" press=".onInvoicePress">
-                        <cells>
-                            <ObjectIdentifier title="{InvoiceNumber}" text="{InvoiceId}"/>
-                            <ObjectIdentifier title="{VendorName}" text="{VendorId}"/>
-                            <Text text="{
-                                path: 'InvoiceDate',
-                                type: 'sap.ui.model.type.Date',
-                                formatOptions: {
-                                    style: 'medium'
-                                }
-                            }"/>
-                            <ObjectNumber
-                                number="{path: 'GrossAmount', formatter: '.formatter.amount'}"
-                                unit="{Currency}"
-                                emphasized="true"/>
-                            <ObjectStatus
-                                text="{Status}"
-                                state="{path: 'Status', formatter: '.formatter.statusState'}"/>
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
+            <VBox width="100%" class="sapUiResponsiveContentPadding">
+                <Panel
+                    width="100%"
+                    expandable="false"
+                    headerText="{i18n>invoiceChartTitle}"
+                    class="sapUiSmallMarginBottom">
+                    <viz:VizFrame
+                        id="invoiceMonthChart"
+                        width="100%"
+                        height="20rem"
+                        uiConfig="{applicationSet: 'fiori'}"
+                        vizType="column">
+                        <viz:dataset>
+                            <viz.data:FlattenedDataset data="{invoiceChart>/months}">
+                                <viz.data:dimensions>
+                                    <viz.data:DimensionDefinition
+                                        name="{i18n>invoiceChartMonth}"
+                                        value="{invoiceChart>Month}"/>
+                                </viz.data:dimensions>
+                                <viz.data:measures>
+                                    <viz.data:MeasureDefinition
+                                        name="{i18n>invoiceChartCount}"
+                                        value="{invoiceChart>Count}"/>
+                                </viz.data:measures>
+                            </viz.data:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <viz.feeds:FeedItem
+                                uid="categoryAxis"
+                                type="Dimension"
+                                values="Monat"/>
+                            <viz.feeds:FeedItem
+                                uid="valueAxis"
+                                type="Measure"
+                                values="Anzahl Rechnungen"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                </Panel>
+                <Table
+                    id="invoiceTable"
+                    mode="None"
+                    growing="true"
+                    growingScrollToLoad="true"
+                    sticky="ColumnHeaders"
+                    width="auto"
+                    items="{
+                        path: '/Invoices',
+                        sorter: {
+                            path: 'InvoiceDate',
+                            descending: true
+                        }
+                    }">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <Title text="{i18n>invoiceTableTitle}" level="H2"/>
+                            <ToolbarSpacer/>
+                            <Button
+                                icon="sap-icon://add"
+                                text="{i18n>createInvoice}"
+                                type="Emphasized"
+                                press=".onCreateInvoice"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <columns>
+                        <Column minScreenWidth="Tablet" demandPopin="false">
+                            <Text text="{i18n>invoiceNumber}"/>
+                        </Column>
+                        <Column minScreenWidth="Tablet" demandPopin="false">
+                            <Text text="{i18n>vendorName}"/>
+                        </Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true">
+                            <Text text="{i18n>invoiceDate}"/>
+                        </Column>
+                        <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+                            <Text text="{i18n>grossAmount}"/>
+                        </Column>
+                        <Column minScreenWidth="Phone" demandPopin="false">
+                            <Text text="{i18n>status}"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem type="Navigation" press=".onInvoicePress">
+                            <cells>
+                                <ObjectIdentifier title="{InvoiceNumber}" text="{InvoiceId}"/>
+                                <ObjectIdentifier title="{VendorName}" text="{VendorId}"/>
+                                <Text text="{
+                                    path: 'InvoiceDate',
+                                    type: 'sap.ui.model.type.Date',
+                                    formatOptions: {
+                                        style: 'medium'
+                                    }
+                                }"/>
+                                <ObjectNumber
+                                    number="{path: 'GrossAmount', formatter: '.formatter.amount'}"
+                                    unit="{Currency}"
+                                    emphasized="true"/>
+                                <ObjectStatus
+                                    text="{Status}"
+                                    state="{path: 'Status', formatter: '.formatter.statusState'}"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
         </f:content>
     </f:DynamicPage>
 </mvc:View>

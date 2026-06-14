@@ -20,6 +20,11 @@ sap.ui.define([
                 data: this._getInitialCreateData(),
                 valueState: this._getInitialCreateValueState()
             }), "createInvoice");
+            this.getView().setModel(new JSONModel({
+                months: []
+            }), "invoiceChart");
+            this._configureInvoiceChart();
+            this._loadInvoiceChartData();
         },
 
         onSearch: function () {
@@ -79,21 +84,28 @@ sap.ui.define([
             var oView = this.getView(),
                 oCreateModel = oView.getModel("createInvoice"),
                 oData = oCreateModel.getProperty("/data"),
-                oParsedData = this._validateCreateData(oData);
+                oParsedData = this._validateCreateData(oData),
+                oModel = this._getInvoiceModel();
 
             if (!oParsedData.valid) {
                 MessageBox.error(this._getText("invoiceValidationError"));
                 return;
             }
 
+            if (!oModel) {
+                MessageBox.error(this._getText("invoiceCreateError"));
+                return;
+            }
+
             oCreateModel.setProperty("/busy", true);
 
-            oView.getModel().create("/Invoices", this._createInvoicePayload(oParsedData), {
+            oModel.create("/Invoices", this._createInvoicePayload(oParsedData), {
                 success: function () {
                     MessageToast.show(this._getText("invoiceCreateSuccess"));
                     this._closeCreateDialog();
                     oCreateModel.setProperty("/busy", false);
-                    oView.getModel().refresh(true);
+                    oModel.refresh(true);
+                    this._loadInvoiceChartData();
                 }.bind(this),
                 error: function () {
                     MessageBox.error(this._getText("invoiceCreateError"));
@@ -150,6 +162,123 @@ sap.ui.define([
             }
 
             oBinding.filter(aFilters);
+        },
+
+        _configureInvoiceChart: function () {
+            var oChart = this.byId("invoiceMonthChart");
+
+            if (!oChart) {
+                return;
+            }
+
+            oChart.setVizProperties({
+                title: {
+                    visible: false
+                },
+                legend: {
+                    visible: false
+                },
+                plotArea: {
+                    dataLabel: {
+                        visible: true
+                    }
+                },
+                categoryAxis: {
+                    title: {
+                        visible: true,
+                        text: this._getText("invoiceChartMonth")
+                    }
+                },
+                valueAxis: {
+                    title: {
+                        visible: true,
+                        text: this._getText("invoiceChartCount")
+                    }
+                }
+            });
+        },
+
+        _loadInvoiceChartData: function () {
+            var oModel = this._getInvoiceModel();
+
+            if (!oModel) {
+                this.getView().getModel("invoiceChart").setProperty("/months", []);
+                return;
+            }
+
+            oModel.read("/Invoices", {
+                urlParameters: {
+                    "$select": "InvoiceDate"
+                },
+                success: function (oData) {
+                    this.getView().getModel("invoiceChart").setProperty(
+                        "/months",
+                        this._buildInvoiceChartData(oData.results || [])
+                    );
+                }.bind(this),
+                error: function () {
+                    this.getView().getModel("invoiceChart").setProperty("/months", []);
+                }.bind(this)
+            });
+        },
+
+        _getInvoiceModel: function () {
+            return this.getView().getModel() || this.getOwnerComponent().getModel();
+        },
+
+        _buildInvoiceChartData: function (aInvoices) {
+            var oMonthCounts = {};
+
+            aInvoices.forEach(function (oInvoice) {
+                var oDate = this._parseInvoiceDate(oInvoice.InvoiceDate),
+                    sMonthKey;
+
+                if (!oDate) {
+                    return;
+                }
+
+                sMonthKey = String(oDate.getFullYear()) + "-" + String(oDate.getMonth() + 1).padStart(2, "0");
+                oMonthCounts[sMonthKey] = (oMonthCounts[sMonthKey] || 0) + 1;
+            }.bind(this));
+
+            return Object.keys(oMonthCounts).sort().map(function (sMonthKey) {
+                return {
+                    Month: this._formatChartMonth(sMonthKey),
+                    Count: oMonthCounts[sMonthKey]
+                };
+            }.bind(this));
+        },
+
+        _parseInvoiceDate: function (vDate) {
+            var aDateParts,
+                iTimestamp,
+                oDate;
+
+            if (vDate instanceof Date && !isNaN(vDate.getTime())) {
+                return vDate;
+            }
+
+            if (typeof vDate === "string") {
+                aDateParts = /\/Date\((-?\d+)\)\//.exec(vDate);
+                iTimestamp = aDateParts ? Number(aDateParts[1]) : Date.parse(vDate);
+                oDate = new Date(iTimestamp);
+
+                if (!isNaN(oDate.getTime())) {
+                    return oDate;
+                }
+            }
+
+            return null;
+        },
+
+        _formatChartMonth: function (sMonthKey) {
+            var aParts = sMonthKey.split("-"),
+                oDate = new Date(Number(aParts[0]), Number(aParts[1]) - 1, 1);
+
+            return oDate.toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short"
+            });
         },
 
         _validateCreateData: function (oData) {
@@ -259,7 +388,9 @@ sap.ui.define([
         },
 
         _getText: function (sKey) {
-            return this.getView().getModel("i18n").getResourceBundle().getText(sKey);
+            var oI18nModel = this.getView().getModel("i18n") || this.getOwnerComponent().getModel("i18n");
+
+            return oI18nModel ? oI18nModel.getResourceBundle().getText(sKey) : sKey;
         }
     });
 });
